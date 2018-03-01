@@ -2,7 +2,11 @@ package main
 
 import (
   "os"
+  "fmt"
+	"net/http"
+	"github.com/gorilla/handlers"
   log "github.com/sirupsen/logrus"
+  "gotest/app/routes"
 )
 
 func init() {
@@ -18,28 +22,12 @@ func init() {
 }
 
 func main() {
-  log.WithFields(log.Fields{
-    "animal": "walrus",
-    "size":   10,
-  }).Info("A group of walrus emerges from the ocean")
-
-  log.WithFields(log.Fields{
-    "omg":    true,
-    "number": 122,
-  }).Warn("The group's number increased tremendously!")
-
-  log.WithFields(log.Fields{
-    "omg":    true,
-    "number": 100,
-  }).Fatal("The ice breaks!")
-
-  // A common pattern is to re-use fields between logging statements by re-using
-  // the logrus.Entry returned from WithFields()
-  contextLogger := log.WithFields(log.Fields{
-    "common": "this is a common field",
-    "other": "I also should be logged always",
-  })
-
-  contextLogger.Info("I'll be logged with common and other field")
-  contextLogger.Info("Me too")
+  r := routes.NewRouter()
+  headersOk := handlers.AllowedHeaders([]string{"Authorization", "Content-Type", "X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	port := 3002
+	addr := fmt.Sprintf(":%v", port)
+	fmt.Printf("APP is listening on port: %d\n", port)
+	log.Fatal(http.ListenAndServe(addr, handlers.CORS(originsOk, headersOk, methodsOk)(r)))
 }
