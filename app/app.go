@@ -23,13 +23,13 @@ func New(cfg config.Config) *App {
 		log.Fatal(err)
 	}
 	initializeDB(db)
-	return &App{cfg, db,nil}
-	//redis, err := database.NewRedisDB(cfg.Redis)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//return &App{cfg, db, redis}
+	//return &App{cfg, db,nil}
+	redis, err := database.NewRedisDB(cfg.Redis)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &App{cfg, db, redis}
 }
 
 func initializeDB(db *database.MySQLDB) {

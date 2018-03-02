@@ -7,6 +7,7 @@ import (
 //"github.com/go-sql-driver/mysql"
 "golang.org/x/crypto/bcrypt"
 "github.com/jinzhu/gorm"
+	"gotest/database"
 )
 
 // User represents a user account for public visibility (used for public endpoints)
@@ -17,6 +18,10 @@ type User struct {
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`
 	Admin     bool           `json:"admin"`
+}
+
+type UserHelper struct {
+	db *database.MySQLDB
 }
 
 // AuthUser represents a user account for private visibility (used for login and update response)
@@ -43,6 +48,37 @@ func (u *User) CheckPassword(password string) bool {
 	return true
 }
 
+func NewUserHelper(db *database.MySQLDB) *UserHelper {
+	return &UserHelper{db}
+}
+
+func (u *UserHelper) Exist(email string) bool {
+	var user User
+	if u.db.Where("email = ?", email).First(&user).RecordNotFound() {
+		return false
+	} else {
+		return true
+	}
+}
+
 func (u *User) IsAdmin() bool {
 	return u.Admin == true
+}
+
+func (uh *UserHelper) FindByEmail(email string) (*User, error) {
+	user := User{}
+	err := uh.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user,nil
+}
+
+func (uh *UserHelper) FindById(id int) (*User, error) {
+	user := User{}
+	err := uh.db.First(&user, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user,nil
 }

@@ -10,11 +10,11 @@ import (
 )
 
 type UserController struct {
-	db database.MySQLDB
+	db *database.MySQLDB
 }
 
-func New() *UserController {
-	return &UserController{}
+func New(db *database.MySQLDB) *UserController {
+	return &UserController{db}
 }
 
 func (uc *UserController) HelloUser(w http.ResponseWriter, r *http.Request) {
@@ -34,13 +34,25 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}*/
 	var user models.User
+	userHelper := models.NewUserHelper(uc.db)
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&user)
-	if err != nil {
-		panic(err)
-	}
 
-	log.WithFields(log.Fields{"r.body": &user}).Info("test1323")
+	if err != nil || user.Name == "" || user.Password == "" {
+		NewAPIError(&APIError{false, "Invalid request", http.StatusBadRequest}, w)
+		return
+	}
+	if userHelper.Exist(user.Email) {
+		NewAPIError(&APIError{false, "This email is already exist ", http.StatusBadRequest}, w)
+		return
+	}
+	user.SetPassword(user.Password)
+
+	err = uc.db.Create(&user).Error
+	if err != nil {
+		NewAPIError(&APIError{false, "Cannot create user", http.StatusInternalServerError}, w)
+		return
+	}
 
 	//j, _ := GetJSON(r.Body)
 	defer r.Body.Close()
