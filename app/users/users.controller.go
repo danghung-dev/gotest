@@ -5,7 +5,15 @@ import (
 	"net/http"
   )
 
-func HelloUser(w http.ResponseWriter, r *http.Request) {
+type UserController struct {
+
+}
+
+func New() *UserController {
+	return &UserController{}
+}
+
+func (uc *UserController) HelloUser(w http.ResponseWriter, r *http.Request) {
 	log.WithFields(log.Fields{
     "omg":    true,
     "number": 122,
