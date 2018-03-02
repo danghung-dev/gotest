@@ -4,11 +4,12 @@ import (
 	"net/http"
 	"github.com/gorilla/mux"
 	"gotest/app/users"
+	"gotest/app"
 )
 
-func NewRouter() *mux.Router {
+func NewRouter(a *app.App) *mux.Router {
 	r := mux.NewRouter()
-	uc := users.New()
+	uc := controllers.New()
 	api := r.PathPrefix("/api/v1").Subrouter()
 
 	// Uploads

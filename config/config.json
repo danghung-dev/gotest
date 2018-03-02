@@ -4,7 +4,7 @@
     "host": "localhost",
     "username": "root",
     "password": "",
-    "database": "app",
+    "database": "gotest",
     "encoding": "utf8mb4",
     "port": "3306"
   },
@@ -17,5 +17,5 @@
       "public_key_path": "config/api.rsa.pub",
       "private_key_path": "config/api.rsa"
   },
-  "port": 8080
+  "port": 3002
 }
