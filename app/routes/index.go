@@ -3,7 +3,7 @@ package routes
 import (
 	"net/http"
 	"github.com/gorilla/mux"
-	"gotest/app/users"
+	"gotest/app/controllers"
 	"gotest/app"
 )
 
@@ -17,6 +17,7 @@ func NewRouter(a *app.App) *mux.Router {
 
 	// Users
 	api.HandleFunc("/users", uc.HelloUser).Methods(http.MethodGet)
+	api.HandleFunc("/users", uc.Create).Methods(http.MethodPost)
 	
 	return r
 }

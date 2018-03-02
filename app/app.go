@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"gotest/config"
 	"gotest/database"
+	"gotest/app/models"
 )
 
 type App struct {
@@ -22,6 +22,7 @@ func New(cfg config.Config) *App {
 	if err != nil {
 		log.Fatal(err)
 	}
+	initializeDB(db)
 	return &App{cfg, db,nil}
 	//redis, err := database.NewRedisDB(cfg.Redis)
 	//if err != nil {
@@ -29,6 +30,10 @@ func New(cfg config.Config) *App {
 	//}
 	//
 	//return &App{cfg, db, redis}
+}
+
+func initializeDB(db *database.MySQLDB) {
+	db.AutoMigrate(&models.User{})
 }
 
 func (a *App) Run(r *mux.Router) {
