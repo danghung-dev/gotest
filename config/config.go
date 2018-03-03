@@ -31,9 +31,16 @@ type Config struct {
 	MySQL MySQLConfig `json:"mysql"`
 	Redis RedisConfig `json:"redis"`
 	JWT   JWTConfig   `json:"jwt"`
+	Facebook FacebookConfig `json:"facebook"`
 	Port  int         `json:"port"`
 }
 
+type FacebookConfig struct {
+	ClientID string
+	ClientSecret string
+	RedirectURL string
+	Scopes []string
+}
 // New creates a new config by reading a json file that matches the types above
 func New(path string) (Config, error) {
 	file, err := os.Open(path)

@@ -17,5 +17,10 @@
       "public_key_path": "config/jwtfile.pub",
       "private_key_path": "config/jwtfile"
   },
+  "facebook": {
+    "ClientID":     "324311177982130",
+    "ClientSecret": "65a6389320e7ee747278598fd84d224e",
+    "RedirectURL":  "http://localhost:3002/api/v1/auth/facebook/callback"
+  },
   "port": 3002
 }

@@ -22,6 +22,13 @@ type User struct {
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`
 	Admin     bool           `json:"admin"`
+	FacebookId string	`json:"facebookId"`
+}
+
+type UserFacebook struct {
+	ID int
+	Name string
+	Email string
 }
 
 type UserHelper struct {
@@ -85,4 +92,13 @@ func (uh *UserHelper) FindById(id int) (*User, error) {
 		return nil, err
 	}
 	return &user,nil
+}
+
+func (uh *UserHelper) FindByFacebookId(id string) (*User, error) {
+	user := User{}
+	err := uh.db.Where("facebook_id = ?", id).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

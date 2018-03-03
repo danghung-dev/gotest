@@ -48,3 +48,7 @@
 [[constraint]]
   name = "github.com/graphql-go/graphql"
   version = "0.7.4"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/oauth2"

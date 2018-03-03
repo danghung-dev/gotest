@@ -50,5 +50,9 @@ func NewRouter(a *app.App) *mux.Router {
 	//auth.HandleFunc("/update", middlewares.Logger(middlewares.RequireAuthentication(a, uc.Update, false))).Methods(http.MethodPut)
 	auth.HandleFunc("/logout", middlewares.Logger(middlewares.RequireAuthentication(a, ac.Logout, false))).Methods(http.MethodGet)
 	auth.HandleFunc("/logout/all", middlewares.Logger(middlewares.RequireAuthentication(a, ac.LogoutAll, false))).Methods(http.MethodGet)
+
+	auth.HandleFunc("/facebook/login", ac.FaceBookLogin).Methods(http.MethodGet)
+	auth.HandleFunc("/facebook/callback", ac.FaceBookCallback).Methods(http.MethodGet)
+
 	return r
 }
