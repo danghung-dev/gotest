@@ -3,6 +3,8 @@ package routes
 import (
 	"net/http"
 	"github.com/gorilla/mux"
+	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/handler"
 	"gotest/app/controllers"
 	"gotest/app"
 	"gotest/app/middlewares"
@@ -24,6 +26,18 @@ func NewRouter(a *app.App) *mux.Router {
 
 	// Uploads
 	// api.HandleFunc("/images/upload", middlewares.Logger(middlewares.RequireAuthentication(a, uploadController.UploadImage, true))).Methods(http.MethodPost)
+
+	// graphql
+	var schema, _ = graphql.NewSchema(graphql.SchemaConfig{
+		Query:    models.RootQuery,
+		Mutation: nil,
+	})
+	h := handler.New(&handler.Config{
+		Schema: &schema,
+		Pretty: true,
+		GraphiQL: true,
+	})
+	r.Handle("/graphql", h)
 
 	// Users
 	api.HandleFunc("/users", middlewares.Logger(uc.HelloUser)).Methods(http.MethodGet)

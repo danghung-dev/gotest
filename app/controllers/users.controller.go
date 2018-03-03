@@ -7,6 +7,7 @@ import (
 	"gotest/database"
 	"gotest/app/models"
 	"encoding/json"
+	"gotest/app/utils"
 )
 
 type UserController struct {
@@ -38,7 +39,7 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&user)
 
-	if err != nil || user.Name == "" || user.Password == "" {
+	if err != nil || user.Name == "" || user.Password == "" || !utils.IsEmail(user.Email) {
 		NewAPIError(&APIError{false, "Invalid request", http.StatusBadRequest}, w)
 		return
 	}

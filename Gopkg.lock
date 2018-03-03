@@ -2,6 +2,15 @@
 
 
 [[projects]]
+  name = "github.com/dgrijalva/jwt-go"
+  packages = [
+    ".",
+    "request"
+  ]
+  revision = "dbeaa9332f19a944acb5736b4456cfcc02140e29"
+  version = "v3.1.0"
+
+[[projects]]
   name = "github.com/go-redis/redis"
   packages = [
     ".",
@@ -41,6 +50,30 @@
   version = "v1.6.1"
 
 [[projects]]
+  name = "github.com/graphql-go/graphql"
+  packages = [
+    ".",
+    "gqlerrors",
+    "language/ast",
+    "language/kinds",
+    "language/lexer",
+    "language/location",
+    "language/parser",
+    "language/printer",
+    "language/source",
+    "language/typeInfo",
+    "language/visitor"
+  ]
+  revision = "5e7dd4fc3e87341229fa03d8f79d2ab5455963fb"
+  version = "v0.7.4"
+
+[[projects]]
+  name = "github.com/graphql-go/handler"
+  packages = ["."]
+  revision = "f0393b2c10daeebea900292b8e092e73475399d9"
+  version = "v0.2.1"
+
+[[projects]]
   name = "github.com/jinzhu/gorm"
   packages = ["."]
   revision = "6ed508ec6a4ecb3531899a69cbc746ccf65a4166"
@@ -59,6 +92,12 @@
   revision = "cb7f23ec59bec0d61b19c56cd88cee3d0cc1870c"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
@@ -72,7 +111,7 @@
     "blowfish",
     "ssh/terminal"
   ]
-  revision = "8c653846df49742c4c85ec37e5d9f8d3ba657895"
+  revision = "91a49db82a88618983a78a06c1cbd4e00ab749ab"
 
 [[projects]]
   branch = "master"
@@ -81,7 +120,7 @@
     "unix",
     "windows"
   ]
-  revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
+  revision = "dd2ff4accc098aceecb86b36eaa7829b2a17b1c9"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -100,6 +139,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f1312c4546eb81b139b2fdec147bc465d845aff04fd14aa0eb18086458001058"
+  inputs-digest = "5c4254b391d808ed22ffa7bf4f262e59c34f020349291a8443b9a3a3d9b062ba"
   solver-name = "gps-cdcl"
   solver-version = 1

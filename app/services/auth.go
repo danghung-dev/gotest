@@ -85,14 +85,24 @@ func (jwtService *jwtAuthService) GenerateTokens(u *models.User) (*Tokens, error
 	uid := strconv.Itoa(int(u.ID))
 	now := time.Now()
 	tokenHash := utils.GetMD5Hash(now.String() + uid)
-	uuidGen, err := uuid.NewV4()
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+	//uuidGen, err := uuid.NewV4()
+	//if err != nil {
+	//	log.Fatal(err)
+	//	return nil, err
+	//}
+	//authClaims := KAuthTokenClaims{
+	//	jwt.StandardClaims{
+	//		Id:        uid + "." + uuidGen.String(),
+	//		ExpiresAt: now.Add(TokenDuration).Unix(),
+	//		IssuedAt:  now.Unix(),
+	//	},
+	//	u.ID,
+	//	u.Admin,
+	//	tokenHash,
+	//}
 	authClaims := KAuthTokenClaims{
 		jwt.StandardClaims{
-			Id:        uid + "." + uuidGen.String(),
+			Id:        uid + "." + uuid.NewV4().String(),
 			ExpiresAt: now.Add(TokenDuration).Unix(),
 			IssuedAt:  now.Unix(),
 		},
@@ -116,13 +126,14 @@ func (jwtService *jwtAuthService) GenerateTokens(u *models.User) (*Tokens, error
 	}
 
 	refreshToken := jwt.New(jwt.SigningMethodRS512)
-	uuidGen, err = uuid.NewV4()
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
+	//uuidGen, err = uuid.NewV4()
+	//if err != nil {
+	//	log.Fatal(err)
+	//	return nil, err
+	//}
 
-	authClaims.Id = uid + "." + uuidGen.String()
+	//authClaims.Id = uid + "." + uuidGen.String()
+	authClaims.Id = uid + "." + uuid.NewV4().String()
 	authClaims.ExpiresAt = now.Add(RefreshTokenDuration).Unix()
 	refreshToken.Claims = authClaims
 	refreshTokenString, err := refreshToken.SignedString(jwtService.privateKey)

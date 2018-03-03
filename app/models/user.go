@@ -6,14 +6,18 @@ import (
 //
 //"github.com/go-sql-driver/mysql"
 "golang.org/x/crypto/bcrypt"
-"github.com/jinzhu/gorm"
+//"github.com/jinzhu/gorm"
 	"gotest/database"
+	"time"
 )
 
 // User represents a user account for public visibility (used for public endpoints)
 // Its MarshalJSON function wont expose its role.
 type User struct {
-	gorm.Model
+	ID        uint `gorm:"primary_key" json:"id"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time	`json:"updatedAt"`
+	DeletedAt *time.Time	`json:"deletedAt"`
 	Name      string         `json:"name"`
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`
