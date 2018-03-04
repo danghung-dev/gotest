@@ -67,7 +67,62 @@ func (ac *AuthController) GoogleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *AuthController) GoogleCallBack(w http.ResponseWriter, r *http.Request) {
+	ggoauthConf := ac.ggConfig
+	code := r.FormValue("code")
 
+	token, err := ggoauthConf.Exchange(oauth2.NoContext, code)
+	if err != nil {
+		fmt.Printf("oauthConf.Exchange() failed with '%s'\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	client := ggoauthConf.Client(oauth2.NoContext, token)
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+
+	if err != nil {
+		fmt.Printf("Get: %s\n", err)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	response, err := GetJSON(resp.Body)
+	if err != nil {
+		NewAPIError(&APIError{false, "Invalid request", http.StatusBadRequest}, w)
+		return
+	}
+
+	email, err := response.GetString("email")
+	//var user models.User
+	user, err := ac.UserHelper.FindByEmail(email)
+
+	if err != nil && err.Error() == "record not found" {
+		user = &models.User{ Email: email}
+		result := ac.App.Database.Create(&user)
+		if result.Error != nil {
+			NewAPIError(&APIError{false, "Cannot create user in db", http.StatusBadRequest}, w)
+			return
+		}
+	}
+
+	tokens, err := ac.jwtService.GenerateTokens(user)
+	if err != nil {
+		NewAPIError(&APIError{false, "Something went wrong", http.StatusBadRequest}, w)
+		return
+	}
+	authUser := &models.AuthUser{
+		User:  user,
+		Admin: user.Admin,
+	}
+
+	data := struct {
+		Tokens *services.Tokens `json:"tokens"`
+		User   *models.AuthUser `json:"user"`
+	}{
+		tokens,
+		authUser,
+	}
+
+	NewAPIResponse(&APIResponse{Success: true, Message: "Login successful", Data: data}, w, http.StatusOK)
 }
 
 func (ac *AuthController) FaceBookLogin(w http.ResponseWriter, r *http.Request) {
