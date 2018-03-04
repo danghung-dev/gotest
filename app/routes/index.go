@@ -37,7 +37,8 @@ func NewRouter(a *app.App) *mux.Router {
 		Pretty: true,
 		GraphiQL: true,
 	})
-	r.Handle("/graphql", h)
+	r.Handle("/graphiql", h)
+	r.Handle("/graphql", middlewares.RequireAuthenGraphql(a, h))
 
 	// Users
 	api.HandleFunc("/users", middlewares.Logger(uc.HelloUser)).Methods(http.MethodGet)

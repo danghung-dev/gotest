@@ -32,6 +32,7 @@ type Config struct {
 	Redis RedisConfig `json:"redis"`
 	JWT   JWTConfig   `json:"jwt"`
 	Facebook FacebookConfig `json:"facebook"`
+	Google GoogleConfig `json:"google"`
 	Port  int         `json:"port"`
 }
 
@@ -41,6 +42,13 @@ type FacebookConfig struct {
 	RedirectURL string
 	Scopes []string
 }
+
+type GoogleConfig struct {
+	ClientID string
+	ClientSecret string
+	RedirectURL string
+}
+
 // New creates a new config by reading a json file that matches the types above
 func New(path string) (Config, error) {
 	file, err := os.Open(path)

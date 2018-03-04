@@ -14,12 +14,15 @@ import (
 	"net/url"
 	"strings"
 	"golang.org/x/oauth2/facebook"
+	"golang.org/x/oauth2/google"
+	"golang.org/x/tools/go/gcimporter15/testdata"
 )
 
 type AuthController struct {
 	App *app.App
 	*models.UserHelper
 	jwtService services.JWTAuthService
+	ggConfig *oauth2.Config
 }
 var (
 	oauthConf = &oauth2.Config{
@@ -30,13 +33,41 @@ var (
 		Endpoint:     facebook.Endpoint,
 	}
 	a = &oauth2.Config{}
-	oauthStateString = "thisshouldberandom"
+	oauthStateString = "dung de kiem tra state"
 )
 func NewAuthController(a *app.App, us *models.UserHelper, jwtService services.JWTAuthService) *AuthController {
 	//oauthConf = &oauth2.Config{
 	//
 	//}
-	return &AuthController{a, us, jwtService}
+	ggConfig := &oauth2.Config{
+		ClientID:     a.Config.Google.ClientID,
+		ClientSecret: a.Config.Google.ClientSecret,
+		RedirectURL:  a.Config.Google.RedirectURL,
+		Scopes:       []string{"profile", "email"},
+		Endpoint:     google.Endpoint,
+	}
+	return &AuthController{a, us, jwtService, ggConfig}
+}
+
+func (ac *AuthController) GoogleLogin(w http.ResponseWriter, r *http.Request) {
+	ggoauthConf := ac.ggConfig
+	Url, err := url.Parse(ggoauthConf.Endpoint.AuthURL)
+	if err != nil {
+		log.Fatal("Parse: ", err)
+	}
+	parameters := url.Values{}
+	parameters.Add("client_id", ggoauthConf.ClientID)
+	parameters.Add("scope", strings.Join(ggoauthConf.Scopes, " "))
+	parameters.Add("redirect_uri", ggoauthConf.RedirectURL)
+	parameters.Add("response_type", "code")
+	parameters.Add("state", oauthStateString)
+	Url.RawQuery = parameters.Encode()
+	url := Url.String()
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func (ac *AuthController) GoogleCallBack(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (ac *AuthController) FaceBookLogin(w http.ResponseWriter, r *http.Request) {

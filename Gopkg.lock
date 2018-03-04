@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "cloud.google.com/go"
+  packages = ["compute/metadata"]
+  revision = "20d4028b8a750c2aca76bf9fefa8ed2d0109b573"
+  version = "v0.19.0"
+
+[[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = [
     ".",
@@ -134,7 +140,10 @@
   packages = [
     ".",
     "facebook",
-    "internal"
+    "google",
+    "internal",
+    "jws",
+    "jwt"
   ]
   revision = "2f32c3ac0fa4fb807a0fcefb0b6f2468a0d99bd0"
 
@@ -164,10 +173,13 @@
 [[projects]]
   name = "google.golang.org/appengine"
   packages = [
+    ".",
     "internal",
+    "internal/app_identity",
     "internal/base",
     "internal/datastore",
     "internal/log",
+    "internal/modules",
     "internal/remote_api",
     "internal/urlfetch",
     "urlfetch"
@@ -178,6 +190,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1583e9a68be0be020753f097e815394ccdd574f94b900428de6070ccd9e7ce25"
+  inputs-digest = "210ef8b907e66ccbd296c65f68abe7619f2ac71ce25507a72df77d139e342162"
   solver-name = "gps-cdcl"
   solver-version = 1

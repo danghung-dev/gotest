@@ -22,5 +22,10 @@
     "ClientSecret": "65a6389320e7ee747278598fd84d224e",
     "RedirectURL":  "http://localhost:3002/api/v1/auth/facebook/callback"
   },
+  "google": {
+    "ClientID":     "274773762335-q431av7n9muii5vn299ae3rt50teglpm.apps.googleusercontent.com",
+    "ClientSecret": "6S7C04pafbnQ9F8QCigbqhHi",
+    "RedirectURL":  "http://localhost:3002/api/v1/auth/google/callback"
+  },
   "port": 3002
 }
