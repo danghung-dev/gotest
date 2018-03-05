@@ -54,6 +54,7 @@ func NewRouter(a *app.App) *mux.Router {
 
 	auth.HandleFunc("/facebook/login", ac.FaceBookLogin).Methods(http.MethodGet)
 	auth.HandleFunc("/facebook/callback", ac.FaceBookCallback).Methods(http.MethodGet)
-
+	auth.HandleFunc("/google/login", ac.GoogleLogin).Methods(http.MethodGet)
+	auth.HandleFunc("/google/callback", ac.GoogleCallBack).Methods(http.MethodGet)
 	return r
 }

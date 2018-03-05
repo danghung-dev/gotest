@@ -151,7 +151,7 @@ func (jwtService *jwtAuthService) GenerateTokens(u *models.User) (*Tokens, error
 	tokens := &Tokens{
 		accessTokenString,
 		refreshTokenString,
-		3600,
+		TokenDuration.Seconds(),
 		TokenType,
 	}
 
@@ -246,14 +246,7 @@ func ExtractRefreshTokenHash(cfg *config.Config, tokenStr string) (string, error
 }
 
 func GetTokenFromRequest(cfg *config.Config, r *http.Request) (string, error) {
-	token, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor,
-		func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-			}
-
-			return []byte(cfg.JWT.Secret), nil
-		})
+	token, err := utils.GetTokenFromRequest(cfg, r)
 
 	if err != nil || !token.Valid {
 		return "", err

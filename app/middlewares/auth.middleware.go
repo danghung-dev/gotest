@@ -15,6 +15,7 @@ import (
 	"gotest/app"
 	"gotest/app/controllers"
 	"gotest/app/services"
+	"gotest/app/utils"
 )
 
 // TODO
@@ -80,22 +81,9 @@ func RequireAuthenGraphql(a *app.App, next http.Handler) http.Handler {
 func RequireAuthentication(a *app.App, next http.HandlerFunc, admin bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		t, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor,
-			func(token *jwt.Token) (interface{}, error) {
-				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-				}
-
-				return []byte(a.Config.JWT.Secret), nil
-			})
-
+		t, err := utils.GetTokenFromRequest(&a.Config, r)
 		if err != nil {
-			if err == request.ErrNoTokenInRequest {
-				controllers.NewAPIError(&controllers.APIError{Success: false, Message: "Missing token", Status: http.StatusUnauthorized}, w)
-				return
-			}
-
-			controllers.NewAPIError(&controllers.APIError{Success: false, Message: "Invalid token", Status: http.StatusUnauthorized}, w)
+			controllers.NewAPIError(&controllers.APIError{Success: false, Message: "Missing token or Invalid Token", Status: http.StatusUnauthorized}, w)
 			return
 		}
 

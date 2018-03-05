@@ -15,7 +15,7 @@ import (
 	"strings"
 	"golang.org/x/oauth2/facebook"
 	"golang.org/x/oauth2/google"
-	"golang.org/x/tools/go/gcimporter15/testdata"
+	"time"
 )
 
 type AuthController struct {
@@ -23,16 +23,9 @@ type AuthController struct {
 	*models.UserHelper
 	jwtService services.JWTAuthService
 	ggConfig *oauth2.Config
+	fbConfig *oauth2.Config
 }
 var (
-	oauthConf = &oauth2.Config{
-		ClientID:     "324311177982130",
-		ClientSecret: "65a6389320e7ee747278598fd84d224e",
-		RedirectURL:  "http://localhost:3002/api/v1/auth/facebook/callback",
-		Scopes:       []string{"public_profile", "email"},
-		Endpoint:     facebook.Endpoint,
-	}
-	a = &oauth2.Config{}
 	oauthStateString = "dung de kiem tra state"
 )
 func NewAuthController(a *app.App, us *models.UserHelper, jwtService services.JWTAuthService) *AuthController {
@@ -46,7 +39,14 @@ func NewAuthController(a *app.App, us *models.UserHelper, jwtService services.JW
 		Scopes:       []string{"profile", "email"},
 		Endpoint:     google.Endpoint,
 	}
-	return &AuthController{a, us, jwtService, ggConfig}
+	fbConfig := &oauth2.Config{
+		ClientID:     a.Config.Facebook.ClientID,
+		ClientSecret: a.Config.Facebook.ClientSecret,
+		RedirectURL:  a.Config.Facebook.RedirectURL,
+		Scopes:       []string{"public_profile", "email"},
+		Endpoint:     facebook.Endpoint,
+	}
+	return &AuthController{a, us, jwtService, ggConfig, fbConfig}
 }
 
 func (ac *AuthController) GoogleLogin(w http.ResponseWriter, r *http.Request) {
@@ -93,10 +93,10 @@ func (ac *AuthController) GoogleCallBack(w http.ResponseWriter, r *http.Request)
 
 	email, err := response.GetString("email")
 	//var user models.User
-	user, err := ac.UserHelper.FindByEmail(email)
+	user, err := ac.UserHelper.FindByGoogleEmail(email)
 
 	if err != nil && err.Error() == "record not found" {
-		user = &models.User{ Email: email}
+		user = &models.User{ Email: email, GoogleEmail: email}
 		result := ac.App.Database.Create(&user)
 		if result.Error != nil {
 			NewAPIError(&APIError{false, "Cannot create user in db", http.StatusBadRequest}, w)
@@ -121,11 +121,14 @@ func (ac *AuthController) GoogleCallBack(w http.ResponseWriter, r *http.Request)
 		tokens,
 		authUser,
 	}
-
+	expiration := time.Now().Add( services.TokenDuration)
+	cookie := http.Cookie{Name: "token", Value:tokens.AccessToken, HttpOnly:true, Expires:expiration,Path:"/"}
+	http.SetCookie(w, &cookie)
 	NewAPIResponse(&APIResponse{Success: true, Message: "Login successful", Data: data}, w, http.StatusOK)
 }
 
 func (ac *AuthController) FaceBookLogin(w http.ResponseWriter, r *http.Request) {
+	oauthConf := ac.fbConfig
 	Url, err := url.Parse(oauthConf.Endpoint.AuthURL)
 	if err != nil {
 		log.Fatal("Parse: ", err)
@@ -142,6 +145,7 @@ func (ac *AuthController) FaceBookLogin(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ac *AuthController) FaceBookCallback(w http.ResponseWriter, r *http.Request) {
+	oauthConf := ac.fbConfig
 	state := r.FormValue("state")
 	if state != oauthStateString {
 		fmt.Printf("invalid oauth state, expected '%s', got '%s'\n", oauthStateString, state)
@@ -158,21 +162,14 @@ func (ac *AuthController) FaceBookCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	resp, err := http.Get("https://graph.facebook.com/me?access_token=" +
-		url.QueryEscape(token.AccessToken))
+	client := oauthConf.Client(oauth2.NoContext, token)
+	resp, err := client.Get("https://graph.facebook.com/me?fields=id,name,email")
+
 	if err != nil {
 		fmt.Printf("Get: %s\n", err)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	//defer resp.Body.Close()
-
-	//response, err := ioutil.ReadAll(resp.Body)
-	//if err != nil {
-	//	fmt.Printf("ReadAll: %s\n", err)
-	//	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-	//	return
-	//}
 
 	response, err := GetJSON(resp.Body)
 	if err != nil {
@@ -210,6 +207,9 @@ func (ac *AuthController) FaceBookCallback(w http.ResponseWriter, r *http.Reques
 		tokens,
 		authUser,
 	}
+	expiration := time.Now().Add( services.TokenDuration)
+	cookie := http.Cookie{Name: "token", Value:tokens.AccessToken, HttpOnly:true, Expires:expiration,Path:"/"}
+	http.SetCookie(w, &cookie)
 
 	NewAPIResponse(&APIResponse{Success: true, Message: "Login successful", Data: data}, w, http.StatusOK)
 
@@ -297,7 +297,8 @@ func (ac *AuthController) Logout(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	cookie := &http.Cookie{Name: "token", Value:"", HttpOnly:true, Expires:time.Unix(0,0),Path:"/"}
+	http.SetCookie(w, cookie)
 	NewAPIResponse(&APIResponse{Success: true, Message: "Logout successful"}, w, http.StatusOK)
 
 }

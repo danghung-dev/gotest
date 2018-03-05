@@ -15,14 +15,16 @@ import (
 // Its MarshalJSON function wont expose its role.
 type User struct {
 	ID        uint `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time	`json:"updatedAt"`
-	DeletedAt *time.Time	`json:"deletedAt"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time	`json:"updated_at"`
+	DeletedAt *time.Time	`json:"deleted_at"`
 	Name      string         `json:"name"`
 	Email     string         `json:"email"`
 	Password  string         `json:"password"`
 	Admin     bool           `json:"admin"`
-	FacebookId string	`json:"facebookId"`
+	FacebookId string	`json:"facebook_id"`
+	GoogleId string `json:"google_id"`
+	GoogleEmail string `json:"google_email"`
 }
 
 type UserFacebook struct {
@@ -101,4 +103,13 @@ func (uh *UserHelper) FindByFacebookId(id string) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (uh *UserHelper) FindByGoogleEmail(email string) (*User, error) {
+	user := User{}
+	err := uh.db.Where("google_email = ?", email).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user,nil
 }

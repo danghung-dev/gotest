@@ -14,6 +14,10 @@ import (
 	"golang.org/x/text/runes"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
+	"fmt"
+	"gotest/config"
 )
 
 func IsEmail(email string) bool {
@@ -62,4 +66,39 @@ func GetRequestScheme(r *http.Request) string {
 	}
 
 	return "http://"
+}
+
+func GetTokenFromRequest(cfg *config.Config, r *http.Request) (*jwt.Token, error) {
+	t, err := request.ParseFromRequest(r, request.AuthorizationHeaderExtractor,
+		func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			}
+
+			return []byte(cfg.JWT.Secret), nil
+		})
+
+	if err != nil {
+		if err == request.ErrNoTokenInRequest {
+			cookie, err := r.Cookie("token")
+			if err != nil {
+				return nil, err
+			}
+			tokenString := cookie.Value
+			t, err = jwt.Parse(tokenString,
+				func(token *jwt.Token) (interface{}, error) {
+					if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+						return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+					}
+
+					return []byte(cfg.JWT.Secret), nil
+				})
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, err
+		}
+	}
+	return t, nil
 }
